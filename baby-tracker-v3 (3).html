@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Baby Tracker</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #fdf8f4;
+  color: #2d2a26;
+  padding-bottom: 3rem;
+}
+header {
+  background: #fff;
+  border-bottom: 1px solid #ede8e2;
+  padding: 1rem 1.25rem 0.75rem;
+  text-align: center;
+  position: sticky; top: 0; z-index: 10;
+}
+header h1 { font-size: 20px; font-weight: 600; }
+header p { font-size: 13px; color: #888; margin-top: 3px; }
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 1rem 1rem 0.75rem;
+}
+.stat {
+  background: #fff;
+  border: 1px solid #ede8e2;
+  border-radius: 12px;
+  padding: 10px 4px;
+  text-align: center;
+}
+.stat-num { font-size: 22px; font-weight: 700; line-height: 1; }
+.stat-label { font-size: 10px; color: #999; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* Section headers */
+.section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1rem 0.5rem;
+}
+.section-title { font-size: 15px; font-weight: 600; color: #2d2a26; }
+.section-line { flex: 1; height: 1px; background: #ede8e2; }
+
+/* Diaper buttons */
+.btns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0 1rem 1rem;
+}
+.btn {
+  background: #fff;
+  border: 2px solid #ede8e2;
+  border-radius: 16px;
+  cursor: pointer;
+  padding: 18px 8px 14px;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s;
+}
+.btn:active { background: #f0ebe4; transform: scale(0.94); }
+.btn .icon { font-size: 30px; display: block; margin-bottom: 6px; }
+.btn .lbl { font-size: 13px; font-weight: 600; }
+
+/* Feed panel */
+.feed-panel {
+  margin: 0 1rem 1rem;
+  background: #fff;
+  border: 1px solid #ede8e2;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.feed-types {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+}
+.feed-type-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid #f0ece6;
+  border-right: 1px solid #f0ece6;
+  cursor: pointer;
+  padding: 14px 8px;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.feed-type-btn:nth-child(2n) { border-right: none; }
+.feed-type-btn:nth-child(3), .feed-type-btn:nth-child(4) { border-bottom: none; }
+.feed-type-btn.selected { background: #fff8e6; }
+.feed-type-btn:active { background: #f5f0ea; }
+.feed-type-btn .icon { font-size: 24px; display: block; margin-bottom: 4px; }
+.feed-type-btn .lbl { font-size: 12px; font-weight: 600; color: #2d2a26; }
+.feed-type-btn .sub { font-size: 11px; color: #aaa; margin-top: 1px; }
+
+.feed-amount-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid #f0ece6;
+}
+.feed-amount-row label { font-size: 13px; color: #888; white-space: nowrap; }
+.feed-amount-row input {
+  flex: 1;
+  border: 1px solid #e0dbd4;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 16px;
+  background: #fdf8f4;
+  color: #2d2a26;
+  outline: none;
+  width: 0;
+}
+.feed-amount-row input:focus { border-color: #c9a800; }
+.feed-amount-row .unit { font-size: 13px; color: #aaa; white-space: nowrap; }
+
+.log-feed-btn {
+  display: block;
+  width: calc(100% - 28px);
+  margin: 10px 14px 14px;
+  padding: 12px;
+  background: #f5c842;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a3800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.log-feed-btn:active { background: #e0b430; transform: scale(0.98); }
+
+/* Status */
+.status {
+  text-align: center;
+  font-size: 13px;
+  color: #aaa;
+  padding: 0 1rem 0.75rem;
+  min-height: 22px;
+}
+.status.ok  { color: #4caf75; }
+.status.err { color: #e05a4b; }
+
+/* Log */
+.log {
+  margin: 0 1rem;
+  background: #fff;
+  border: 1px solid #ede8e2;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.log-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f0ece6;
+}
+.log-item:last-child { border-bottom: none; }
+.log-item .ico { font-size: 18px; width: 26px; text-align: center; flex-shrink: 0; }
+.log-item .info { flex: 1; min-width: 0; }
+.log-item .type { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-item .time { font-size: 11px; color: #aaa; margin-top: 1px; }
+.log-item .tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; flex-shrink: 0; }
+.tag-ok      { background: #e8f7ee; color: #2e7d4f; }
+.tag-pending { background: #fff3cd; color: #856404; }
+.tag-feed    { background: #fff0b3; color: #7a5c00; }
+.tag-diaper  { background: #e8f0fe; color: #1a56b0; }
+.empty { text-align: center; padding: 2rem 1rem; color: #bbb; font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#128118; Baby Tracker</h1>
+  <p id="date-label"></p>
+</header>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="s-pee">0</div><div class="stat-label">Pees</div></div>
+  <div class="stat"><div class="stat-num" id="s-poop">0</div><div class="stat-label">Poops</div></div>
+  <div class="stat"><div class="stat-num" id="s-feeds">0</div><div class="stat-label">Feeds</div></div>
+  <div class="stat"><div class="stat-num" id="s-oz">0</div><div class="stat-label">Oz today</div></div>
+</div>
+
+<!-- Diapers -->
+<div class="section">
+  <span class="section-title">&#128464; Diapers</span>
+  <span class="section-line"></span>
+</div>
+<div class="btns">
+  <button class="btn" onclick="logDiaper('pee')"><span class="icon">&#128167;</span><div class="lbl">Pee</div></button>
+  <button class="btn" onclick="logDiaper('poop')"><span class="icon">&#128169;</span><div class="lbl">Poop</div></button>
+  <button class="btn" onclick="logDiaper('both')"><span class="icon">&#128167;&#128169;</span><div class="lbl">Both</div></button>
+</div>
+
+<!-- Feeds -->
+<div class="section">
+  <span class="section-title">&#127868; Feeding</span>
+  <span class="section-line"></span>
+</div>
+<div class="btns">
+  <button class="btn" onclick="logFeed('Left breast')"><span class="icon">&#127816;</span><div class="lbl">Left</div></button>
+  <button class="btn" onclick="logFeed('Right breast')"><span class="icon">&#127816;</span><div class="lbl">Right</div></button>
+  <button class="btn" onclick="logFeed('Both breasts')"><span class="icon">&#127816;&#127816;</span><div class="lbl">Both</div></button>
+</div>
+<div class="btns" style="padding-top:0">
+  <button class="btn" onclick="logFeed('Bottle')" style="grid-column:1/-1;padding:14px"><span class="icon" style="display:inline;font-size:22px;margin-right:8px">&#127868;</span><span class="lbl" style="font-size:15px">Bottle</span></button>
+</div>
+
+<div class="status" id="status"></div>
+
+<!-- Combined log -->
+<div class="section">
+  <span class="section-title">&#128203; Today's log</span>
+  <span class="section-line"></span>
+</div>
+<div class="log" id="log">
+  <div class="empty">Tap a button above<br>to start tracking.</div>
+</div>
+
+<script>
+var SCRIPT = 'https://script.google.com/macros/s/AKfycbywum_esoPdqjKu2P4EQrRmgBO7rE-B3LeOHFSC7KZiLOdBlFvPWr8_r4c_bEXpNobU/exec';
+var entries  = [];
+var pees = 0, poops = 0, feeds = 0, totalOz = 0;
+
+document.getElementById('date-label').textContent = new Date().toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+
+// ── Log feed ───────────────────────────────────────────────────────────────
+function logFeed(feedType) {
+  var isBottle = feedType === 'Bottle';
+  var promptMsg = isBottle ? 'How many oz? (tap OK to skip)' : 'How many minutes? (tap OK to skip)';
+  var unit = isBottle ? 'oz' : 'min';
+  var input = prompt(promptMsg, '');
+  var amount = (input !== null && input.trim() !== '') ? parseFloat(input) : 0;
+  var ts = new Date();
+
+  var entry = { kind:'feed', feedType: feedType, amount: amount, unit: unit, ts: ts, synced: false };
+  entries.unshift(entry);
+  feeds++;
+  if (isBottle && amount) totalOz = Math.round((totalOz + amount) * 10) / 10;
+
+  updateStats();
+  setStatus('', 'Syncing to Google Sheets...');
+  render();
+
+  var url = SCRIPT + '?tab=feed&feedType=' + encodeURIComponent(feedType)
+    + '&amount=' + amount + '&unit=' + unit + '&ts=' + encodeURIComponent(ts.toISOString());
+  ping(url, entry);
+}
+
+// ── Log diaper ────────────────────────────────────────────────────────────
+function logDiaper(type) {
+  var ts    = new Date();
+  var entry = { kind:'diaper', type: type, ts: ts, synced: false };
+  entries.unshift(entry);
+
+  if (type === 'pee'  || type === 'both') pees++;
+  if (type === 'poop' || type === 'both') poops++;
+
+  updateStats();
+  setStatus('', 'Syncing to Google Sheets...');
+  render();
+
+  var url = SCRIPT + '?type=' + type + '&ts=' + encodeURIComponent(ts.toISOString());
+  ping(url, entry);
+}
+
+// ── Ping script ───────────────────────────────────────────────────────────
+function ping(url, entry) {
+  var img = new Image();
+  img.onload = img.onerror = function() {
+    entry.synced = true;
+    setStatus('ok', 'Saved to Google Sheets ✓');
+    render();
+  };
+  img.src = url;
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('s-pee').textContent   = pees;
+  document.getElementById('s-poop').textContent  = poops;
+  document.getElementById('s-feeds').textContent = feeds;
+  document.getElementById('s-oz').textContent    = totalOz % 1 === 0 ? totalOz : totalOz.toFixed(1);
+}
+
+function setStatus(state, msg) {
+  var el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + (state === 'ok' ? 'ok' : state === 'err' ? 'err' : '');
+}
+
+function render() {
+  var list = document.getElementById('log');
+  if (!entries.length) {
+    list.innerHTML = '<div class="empty">Tap a button above<br>to start tracking.</div>';
+    return;
+  }
+  list.innerHTML = entries.map(function(e) {
+    var time = e.ts.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    var syncTag = e.synced
+      ? '<span class="tag tag-ok">Synced</span>'
+      : '<span class="tag tag-pending">...</span>';
+
+    if (e.kind === 'feed') {
+      var icon  = e.feedType === 'Bottle' ? '&#127868;' : '&#127816;';
+      var label = e.feedType + (e.amount ? ' — ' + e.amount + ' ' + e.unit : '');
+      return '<div class="log-item">'
+        + '<span class="ico">' + icon + '</span>'
+        + '<div class="info"><div class="type">' + label + '</div><div class="time">' + time + ' &middot; <span class="tag tag-feed" style="display:inline;padding:1px 5px;font-size:10px;">Feed</span></div></div>'
+        + syncTag + '</div>';
+    } else {
+      var icon  = e.type === 'pee' ? '&#128167;' : e.type === 'poop' ? '&#128169;' : '&#128167;&#128169;';
+      var label = e.type === 'pee' ? 'Pee' : e.type === 'poop' ? 'Poop' : 'Pee + Poop';
+      return '<div class="log-item">'
+        + '<span class="ico">' + icon + '</span>'
+        + '<div class="info"><div class="type">' + label + '</div><div class="time">' + time + ' &middot; <span class="tag tag-diaper" style="display:inline;padding:1px 5px;font-size:10px;">Diaper</span></div></div>'
+        + syncTag + '</div>';
+    }
+  }).join('');
+}
+</script>
+</body>
+</html>
